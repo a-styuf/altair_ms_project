@@ -11,7 +11,7 @@ class MSDev:
         self.serial.baudrate = kw.get('baudrate', 9600)
         self.serial.timeout = kw.get('timeout', 0.1)
         self.serial.port = kw.get("port", "COM0")
-        self.debug = kw.get("debug", True)
+        self.debug = kw.get("debug", False)
         #
         self.read_data = []
         self.write_data = []
@@ -47,6 +47,21 @@ class MSDev:
         read_data = self.request(mode="read", dev_id=dev_id, var_id=var_id, offset=offset, d_len=d_len, data=data)
         return list(read_data)[8:]
 
+    def get_ms_temp(self):
+        read_data = self.read(dev_id=6, var_id=5, offset=256+20, d_len=2, data=None)
+        temp = (read_data[1]*256 + read_data[0]) / 256
+        return temp
+
+    def get_pn_v_and_i(self):
+        voltage_arr = []
+        curr_arr = []
+        for i in range(5):
+            read_data = self.read(dev_id=6, var_id=5, offset=256+16+i*18, d_len=2, data=None)
+            voltage_arr.append((read_data[1]*256 + read_data[0]) / 256)
+            read_data = self.read(dev_id=6, var_id=5, offset=256 + 18+i*18, d_len=2, data=None)
+            curr_arr.append((read_data[1] * 256 + read_data[0]) / 256)
+        return voltage_arr, curr_arr
+
     def request(self, mode="read", dev_id=0, var_id=0, offset=0, d_len=0, data=None):
         #
         can_num = 1
@@ -69,7 +84,7 @@ class MSDev:
             packet_list.extend(data[0 + part_offset:part_len + part_offset])
             part_offset += 8
             self.serial.write(bytes(packet_list))
-            read_data += self.serial.read(7+part_len)
+            read_data += self.serial.read(8+part_len)
         id_var = ((dev_id & 0x0F) << 28) | ((var_id & 0x0F) << 24) | ((offset & 0x1FFFFF) << 3) | \
                  ((0x00 & 0x01) << 2) | ((rtr & 0x01) << 1) | ((0x00 & 0x01) << 0)
         self._print("Try to send command <0x%08X> (%s):" % (id_var, self._id_var_to_str(id_var)))

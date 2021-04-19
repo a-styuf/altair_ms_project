@@ -14,7 +14,7 @@ if __name__ == '__main__':
     ms = ms_device.MSDev(port="COM9", baudrate=9600, timeout=0.05)
     ms.connection()
     time.sleep(0.1)
-    # мигание светодиодом
-    ms.write(dev_id=6, var_id=4, offset=48, d_len=1, data=[127])
-    time.sleep(0.1)
-
+    # температура МС
+    read_data = ms.read(dev_id=6, var_id=5, offset=256 + 20, d_len=2, data=None)
+    temp = (read_data[1] * 256 + read_data[0]) / 256
+    print(temp)
