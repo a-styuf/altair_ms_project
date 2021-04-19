@@ -13,20 +13,29 @@ if __name__ == '__main__':
     # температура МС в течении минуты
     time_s = 0
     temp_array = []
+    voltage_array = []
     while time_s < 20:
         time_s = time_s + 1
         time.sleep(1.)
-        # чтение температуры
         read_data = ms.read(dev_id=6, var_id=5, offset=256 + 20, d_len=2, data=None)
         temp = (read_data[1] * 256 + read_data[0]) / 256
+        read_data = ms.read(dev_id=6, var_id=5, offset=256 + 16, d_len=2, data=None)
+        voltage = (read_data[1] * 256 + read_data[0]) / 256
         print(temp)
         temp_array.append(temp)
-    # график температуры
-    plt.plot(temp_array, label="T")
-    plt.ylabel('Температура, °C')
-    plt.xlabel('Время, с')
-    plt.title('Температура')
-    plt.grid()
+        voltage_array.append(voltage)
+    # график температуры и напряжения
+    fig, (ax1, ax2) = plt.subplots(2, 1)
+    #
+    ax1.plot(temp_array, label="T")
+    ax1.legend()
+    ax1.set(ylabel='Температура', title='Температура и Напряжение')
+    ax1.grid()
+    #
+    ax2.plot(voltage_array, label="U")
+    ax2.legend()
+    ax2.set(xlabel='Время, с', ylabel='Напряжение')
+    ax2.grid()
     #
     plt.show()
     #

@@ -142,11 +142,11 @@ def get_com_list():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    ms = MSDev(port="COM7", baudrate=9600)
+    print(get_com_list())
+    #
+    ms = MSDev(port="COM9", baudrate=9600)
     print(ms)
     ms.connection()
     print(ms)
-    ms.write(dev_id=6, var_id=4, offset=39, d_len=1, data=[0xA5])
-    read_data = ms.read(dev_id=6, var_id=5, offset=0, d_len=128)
-    print(["%02X " % var for var in read_data])
-
+    ms.write(dev_id=6, var_id=4, offset=17, d_len=1, data=[0x1F])
+    print(ms.get_ms_temp(), ms.get_pn_v_and_i())
